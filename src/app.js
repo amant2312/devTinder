@@ -10,4 +10,11 @@ const app=express();
 
 app.use('/test',[middlewarOne, middlewareTwo]);
 
+app.use('/', (err, req, res, next)=>{
+    if(err){
+        res.status(500).send("Service unavailable");
+    }
+    
+});
+
 app.listen(3000,()=>{console.log("listening");});
