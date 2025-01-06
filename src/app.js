@@ -1,9 +1,13 @@
-const express= require("express")
+const express= require("express");
+const {middlewarOne,middlewareTwo}= require("./middlewares/auth");
 
 const app=express();
 
 //app.use('/',(req,res)=>{ res.send("hello world"); });
-app.use('/test',[(req,res,next)=>{ next(); /* res.send("hello world from 1st")*/}, (req,res)=>{ res.send("hello world from 2nd"); }]);
+// console.log(m1);
+// console.log(m2);
 
-app.listen(3000,()=>{console.log("listening");
-})
+
+app.use('/test',[middlewarOne, middlewareTwo]);
+
+app.listen(3000,()=>{console.log("listening");});
