@@ -5,6 +5,25 @@ const User= require("./models/user");
 
 app.use(express.json());
 
+
+app.get('/user', async (req, res)=>{
+    try{
+        const email=req.body.emailId;
+        const user= await User.find({emailId: email});
+        // console.log(user.length);
+        if(user.length === 0){
+            res.send("No user found");
+        }
+        else{
+            res.send(user);
+        }
+    }
+    catch(err){
+        res.sendStatus(402).send("Something went wrong");
+    }
+    
+});
+
 app.post("/signup", async (req, res)=> {
     
     const user = new User(req.body);
