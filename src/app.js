@@ -19,7 +19,7 @@ app.get('/user', async (req, res)=>{
         }
     }
     catch(err){
-        res.sendStatus(402).send("Something went wrong");
+        res.status(402).send("Something went wrong");
     }
     
 });
@@ -32,7 +32,7 @@ app.post("/signup", async (req, res)=> {
         res.send("User created successfully");
     }
     catch(error){
-        res.sendStatus(400).send(error.message);
+        res.status(400).send("Something went wrong " + error.message);
     }
 });
 
