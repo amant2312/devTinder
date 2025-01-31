@@ -51,6 +51,38 @@ app.patch("/user", async (req, res)=> {
     }
 });
 
+app.post("/login", async (req, res)=>{
+
+    try{
+        const {emailId, password} = req.body;
+        const user = await User.findOne({ emailId: emailId });
+        if (!user) {
+          throw new Error("Invalid credentials");
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (isPasswordValid) {
+          res.send("Login Successful!!!");
+        } else {
+          throw new Error("Invalid credentials");
+        }
+
+        // console.log(emailId);
+        // const user= await User.findOne({emailId});
+        // // console.log((bcrypt.hash(password,10))+ "  AND     "  + user.password );
+        // const encryptedHash = await bcrypt.hash(password,10);
+        // if(! encryptedHash == user.password ){
+        //     throw new Error("Invalid User");
+        // }
+        // res.send("Authentication Successfull");
+    }
+    catch(error){
+        res.status(400).send("Error : " + error.message);
+    }
+    
+
+});
+
+
 
 app.post("/signup", async (req, res)=> {
 
