@@ -4,8 +4,11 @@ const bcrypt= require("bcrypt");
 const {validateSignUpData} = require("./utils/validator");
 const app=express();
 const User= require("./models/user");
+const cookieParser= require("cookie-parser");
+const jwt= require("jsonwebtoken");
 
 app.use(express.json());
+app.use(cookieParser());
 
 
 app.get('/user', async (req, res)=>{
@@ -59,8 +62,12 @@ app.post("/login", async (req, res)=>{
         if (!user) {
           throw new Error("Invalid credentials");
         }
+        // const {id}= user._id;
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (isPasswordValid) {
+
+          const token =  jwt.sign({id: user._id},"shhhh");
+          res.cookie("token", token);
           res.send("Login Successful!!!");
         } else {
           throw new Error("Invalid credentials");
@@ -82,7 +89,28 @@ app.post("/login", async (req, res)=>{
 
 });
 
+app.get('/profile', async (req, res)=>{
 
+    try{
+        //validate cookie id
+        if(!req.cookies.token){
+            throw new Error("Invalid token");
+        }
+        const decrypted =jwt.verify(req.cookies.token, "shhhh");
+        //return user info
+        const user= await User.findById(decrypted.id);
+        if(!user){
+            throw new Error("Invalid User");
+        }
+        console.log(user);
+        res.send(user);
+
+    }
+    catch(error){
+        res.status(400).send("Error : " + error.message);
+    }
+    
+});
 
 app.post("/signup", async (req, res)=> {
 
