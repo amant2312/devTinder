@@ -16,7 +16,6 @@ app.get('/user', async (req, res)=>{
     try{
         const email=req.body.emailId;
         const user= await User.find({emailId: email});
-        // console.log(user.length);
         if(user.length === 0){
             res.send("No user found");
         }
@@ -57,37 +56,26 @@ app.patch("/user", async (req, res)=> {
 
 app.post("/login", async (req, res)=>{
 
-    try{
+    try
+    {
         const {emailId, password} = req.body;
         const user = await User.findOne({ emailId: emailId });
         if (!user) {
           throw new Error("Invalid credentials");
         }
-        // const {id}= user._id;
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await user.validatePassword(password);
         if (isPasswordValid) {
 
-          const token =  jwt.sign({id: user._id},"shhhh",{expiresIn: '1d'});
-          res.cookie("token", token, {expire: new Date(Date.now() +9*3600000)});
+          const token =  await user.jwt();
+          res.cookie("token", token, {expires: new Date(Date.now() + 9*3600000)});
           res.send("Login Successful!!!");
         } else {
           throw new Error("Invalid credentials");
         }
-
-        // console.log(emailId);
-        // const user= await User.findOne({emailId});
-        // // console.log((bcrypt.hash(password,10))+ "  AND     "  + user.password );
-        // const encryptedHash = await bcrypt.hash(password,10);
-        // if(! encryptedHash == user.password ){
-        //     throw new Error("Invalid User");
-        // }
-        // res.send("Authentication Successfull");
     }
     catch(error){
         res.status(400).send("Error : " + error.message);
     }
-    
-
 });
 
 app.post('/sendConnectionRequest', userAuth, (req, res)=>{
@@ -96,21 +84,9 @@ app.post('/sendConnectionRequest', userAuth, (req, res)=>{
 
 app.get('/profile',userAuth, (req, res)=>{
 
-    try{
-        //validate cookie id
-        /* if(!req.cookies.token){
-            throw new Error("Invalid token");
-        }
-        const decrypted =jwt.verify(req.cookies.token, "shhhh");
-        //return user info
-        const user= await User.findById(decrypted.id);
-        if(!user){
-            throw new Error("Invalid User");
-        }
-        console.log(user); */
-
+    try
+    {
         res.send("user name is "+req.user.firstName);
-
     }
     catch(error){
         res.status(400).send("Error : " + error.message);

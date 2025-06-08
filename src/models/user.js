@@ -1,5 +1,9 @@
 const mongoose= require("mongoose");
 const validator = require('validator');
+const jwt= require("jsonwebtoken");
+const bcrypt= require("bcrypt");
+
+
 const userSchema = new mongoose.Schema(
     {
       firstName: {
@@ -56,49 +60,21 @@ const userSchema = new mongoose.Schema(
     }
   );
 
+  userSchema.methods.jwt = async function() {
+    const user = this;
+    const token= await jwt.sign({id: user._id},"shhhh",{expiresIn: '1d'});
+    return token;
+  }
+
+  userSchema.methods.validatePassword= async function(userPassword){
+
+    const user = this;
+    const isPasswordValid= await bcrypt.compare(userPassword, user.password);
+    return isPasswordValid;
+
+  }
 
 
-
-// const userSchema= new mongoose.Schema({
-//     firstName: {
-//         type: String,
-//         required: true
-//     },
-//     lastName: {
-//         type: String
-//     },
-//     emailId: {
-//         type: String,
-//         lowercase: true,
-//         required: true,
-//         unique: true,
-//         trim: true, 
-//     },
-//     password: {
-//         type: String,
-//         required: true
-//     },
-//     age: {
-//         type: String,
-//         required: true,
-//         min: 18
-//     },
-//     gender: {
-//         type: String,
-//         required: true,
-//         validate(value) {
-//               if(!["male","female","others"].includes(value)){
-//                 throw new Error("Gender data is not valid");
-//               }
-//             }
-//     }
-// },{timestamps: true}
-// );
-
-// // console.log(mongoose.Schema);
-// // console.log("\n"+userSchema);
 const User= mongoose.model("User",userSchema);
-//console.log("\n"+User);
-
 module.exports= User;
 
