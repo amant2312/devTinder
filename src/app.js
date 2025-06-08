@@ -6,6 +6,7 @@ const app=express();
 const User= require("./models/user");
 const cookieParser= require("cookie-parser");
 const jwt= require("jsonwebtoken");
+const {userAuth}= require("./middlewares/auth.js")
 
 app.use(express.json());
 app.use(cookieParser());
@@ -66,8 +67,8 @@ app.post("/login", async (req, res)=>{
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (isPasswordValid) {
 
-          const token =  jwt.sign({id: user._id},"shhhh");
-          res.cookie("token", token);
+          const token =  jwt.sign({id: user._id},"shhhh",{expiresIn: '1d'});
+          res.cookie("token", token, {expire: new Date(Date.now() +9*3600000)});
           res.send("Login Successful!!!");
         } else {
           throw new Error("Invalid credentials");
@@ -89,11 +90,15 @@ app.post("/login", async (req, res)=>{
 
 });
 
-app.get('/profile', async (req, res)=>{
+app.post('/sendConnectionRequest', userAuth, (req, res)=>{
+    res.send("Established connection successfully");
+});
+
+app.get('/profile',userAuth, (req, res)=>{
 
     try{
         //validate cookie id
-        if(!req.cookies.token){
+        /* if(!req.cookies.token){
             throw new Error("Invalid token");
         }
         const decrypted =jwt.verify(req.cookies.token, "shhhh");
@@ -102,8 +107,9 @@ app.get('/profile', async (req, res)=>{
         if(!user){
             throw new Error("Invalid User");
         }
-        console.log(user);
-        res.send(user);
+        console.log(user); */
+
+        res.send("user name is "+req.user.firstName);
 
     }
     catch(error){
