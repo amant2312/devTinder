@@ -6,111 +6,18 @@ const app=express();
 const User= require("./models/user");
 const cookieParser= require("cookie-parser");
 const jwt= require("jsonwebtoken");
-const {userAuth}= require("./middlewares/auth.js")
+const authRouter= require('./router/authRouter.js');
+const profileRouter= require('./router/profileRoute.js');
+const requestRouter= require('./router/requestRouter.js');
+
 
 app.use(express.json());
 app.use(cookieParser());
+app.use('/',authRouter);
+app.use('/',profileRouter);
+app.use('/',requestRouter);
 
 
-app.get('/user', async (req, res)=>{
-    try{
-        const email=req.body.emailId;
-        const user= await User.find({emailId: email});
-        if(user.length === 0){
-            res.send("No user found");
-        }
-        else{
-            res.send(user);
-        }
-    }
-    catch(err){
-        res.status(402).send("Something went wrong");
-    }
-    
-});
-
-app.patch("/user", async (req, res)=> {
-    const id= req.body.userId;
-    const data= req.body;
-    try{
-        const ALLLOWED_UPDATES= ["photoUrl", "about", "gender", "age", "skills"];
-        const isUpdateAllowed= Object.keys(data).every((k)=>
-            ALLLOWED_UPDATES.includes(k)
-        );
-        
-        if(!isUpdateAllowed){
-            throw new Error("Email update is not allowed");
-        }
-        
-        const user= await User.findByIdAndUpdate(id, data, {
-            returnDocument: true,
-            runValidators:true
-        });
-        console.log(user);
-        res.send("User updated successfully");
-    }
-    catch(error){
-        res.status(400).send("Something went wrong in the update: " + error.message);
-    }
-});
-
-app.post("/login", async (req, res)=>{
-
-    try
-    {
-        const {emailId, password} = req.body;
-        const user = await User.findOne({ emailId: emailId });
-        if (!user) {
-          throw new Error("Invalid credentials");
-        }
-        const isPasswordValid = await user.validatePassword(password);
-        if (isPasswordValid) {
-
-          const token =  await user.jwt();
-          res.cookie("token", token, {expires: new Date(Date.now() + 9*3600000)});
-          res.send("Login Successful!!!");
-        } else {
-          throw new Error("Invalid credentials");
-        }
-    }
-    catch(error){
-        res.status(400).send("Error : " + error.message);
-    }
-});
-
-app.post('/sendConnectionRequest', userAuth, (req, res)=>{
-    res.send("Established connection successfully");
-});
-
-app.get('/profile',userAuth, (req, res)=>{
-
-    try
-    {
-        res.send("user name is "+req.user.firstName);
-    }
-    catch(error){
-        res.status(400).send("Error : " + error.message);
-    }
-    
-});
-
-app.post("/signup", async (req, res)=> {
-
-    try{    
-        validateSignUpData(req);
-        const { firstName, lastName, emailId, password }= req.body;
-
-        const passwordHash= await bcrypt.hash(password,10);
-        console.log(passwordHash);
-
-        const user= new User({ firstName, lastName, emailId, password: passwordHash });
-        await user.save();
-        res.send("User created successfully");
-    }
-    catch(error){
-        res.status(400).send("Error : " + error.message);
-    }
-});
 
 connectDB()
     .then(()=>{
