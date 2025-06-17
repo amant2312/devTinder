@@ -43,6 +43,11 @@ authRouter.post("/login", async (req, res)=>{
     }
 });
 
+authRouter.post('/logout', (req,res)=>{
+    res.cookie("token",null,{expires: new Date(Date.now())});
+    res.send("Logged out successfully");
+});
+
 authRouter.post('/sendConnectionRequest', userAuth, (req, res)=>{
     res.send("Established connection successfully");
 });
