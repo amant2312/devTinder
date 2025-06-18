@@ -13,5 +13,30 @@ function validateSignUpData(req){
     }
     
 }
+function validateEditProfileData(req){
+    const data= req.body;
+    
+        const ALLLOWED_UPDATES= ["photoUrl", "about", "gender", "age", "skills"];
+        const isUpdateAllowed= Object.keys(data).every((k)=>
+            ALLLOWED_UPDATES.includes(k)
+        );
+        
+        if(!isUpdateAllowed){
+            throw new Error("Request contains Invalid fields for update");
+        }
 
-module.exports={validateSignUpData};
+        if(data.photoUrl!=null){
+            if(!validator.isURL(data.photoUrl)){
+                throw new Error("Invalid profile URL");
+            }
+        }
+        if(data.skills != null){
+            if(data.skills.length > 6){
+                throw new Error("Please enter atmost 5 skills");
+            }
+        }
+        
+
+}
+
+module.exports={validateSignUpData, validateEditProfileData};
