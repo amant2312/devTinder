@@ -8,11 +8,16 @@ function validateSignUpData(req){
     if(!firstName || !lastName){
         throw new Error("Invalid Name");
     }
-    if(!validator.isStrongPassword(password)){
+    if(!isStrongPassword(password)){
         throw new Error("Weak Password");
     }
     
 }
+
+function isStrongPassword(password){
+    return validator.isStrongPassword(password);
+}
+
 function validateEditProfileData(req){
     const data= req.body;
     
@@ -39,4 +44,4 @@ function validateEditProfileData(req){
 
 }
 
-module.exports={validateSignUpData, validateEditProfileData};
+module.exports={validateSignUpData, validateEditProfileData, isStrongPassword};
