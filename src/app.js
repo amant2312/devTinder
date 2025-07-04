@@ -9,6 +9,7 @@ const jwt= require("jsonwebtoken");
 const authRouter= require('./router/authRouter.js');
 const profileRouter= require('./router/profileRoute.js');
 const requestRouter= require('./router/requestRouter.js');
+const requestHandelingRouter= require('./router/requestHandelingRoute.js');
 
 
 app.use(express.json());
@@ -16,6 +17,7 @@ app.use(cookieParser());
 app.use('/',authRouter);
 app.use('/',profileRouter);
 app.use('/',requestRouter);
+app.use('/',requestHandelingRouter);
 
 
 
