@@ -4,6 +4,7 @@ const Connection= require('../models/connectionRequest');
 const {userAuth}= require('../middlewares/auth');
 const connectionRequest = require('../models/connectionRequest');
 const USER_DATA_REQUIRED= "firstName lastName photoUrl age gender about skills";
+const User = require('../models/user');
 
 userRouter.get('/user/request/received',userAuth, async (req,res)=>{
 try{
@@ -55,5 +56,43 @@ userRouter.get('/user/connections', userAuth, async (req, res)=>{
         });
     }
 });
+
+
+userRouter.get("/user/feed", userAuth, async (req, res)=>{
+    /*  
+    Get the connections where touserId or fromUserId is the loggedin User's id
+    Add those values to a set
+    From the Users collection find all records that are not in the set 
+    return USER_DATA_REQUIRED for those records.
+    */
+   try{
+        const loggedinUserId=req.user._id;
+        const connections= await Connection.find({
+            $or: [{toUserId: loggedinUserId},{fromUserId: loggedinUserId}]
+        }).select("toUserId fromUserId");
+        
+        const hiddenUsersFeed= new Set();
+        connections.forEach((row)=>{
+            hiddenUsersFeed.add(row.toUserId);
+            hiddenUsersFeed.add(row.fromUserId);
+        })
+        
+
+        const feedUsers= await User.find({
+            $and: [
+                { _id: {$nin: Array.from(hiddenUsersFeed)}},
+                { _id:{$ne: loggedinUserId}}
+            ]
+            
+        }).select(USER_DATA_REQUIRED);
+        res.json({data: feedUsers});
+        
+   }
+   catch(error){
+        res.status(400).json({message: error.message});
+   }
+
+});
+
 
 module.exports= userRouter; 
