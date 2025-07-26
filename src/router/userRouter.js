@@ -59,13 +59,13 @@ userRouter.get('/user/connections', userAuth, async (req, res)=>{
 
 
 userRouter.get("/user/feed", userAuth, async (req, res)=>{
-    /*  
-    Get the connections where touserId or fromUserId is the loggedin User's id
-    Add those values to a set
-    From the Users collection find all records that are not in the set 
-    return USER_DATA_REQUIRED for those records.
-    */
    try{
+        const page= (req.query.page)?req.query.page:1;
+        let limit=(req.query.limit)?req.query.limit:10;
+        if(limit>50){
+            limit=50;
+        }
+        
         const loggedinUserId=req.user._id;
         const connections= await Connection.find({
             $or: [{toUserId: loggedinUserId},{fromUserId: loggedinUserId}]
@@ -84,7 +84,10 @@ userRouter.get("/user/feed", userAuth, async (req, res)=>{
                 { _id:{$ne: loggedinUserId}}
             ]
             
-        }).select(USER_DATA_REQUIRED);
+        }).select(USER_DATA_REQUIRED)
+        .skip((page-1)*10)
+        .limit(limit);
+
         res.json({data: feedUsers});
         
    }
